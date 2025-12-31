@@ -11,6 +11,12 @@ rustscan -u 5000 -a 192.162.12.145 -- -Pn -sC
 ```bash
 nmap -p- -T5 -vv -oA DC-Nmap -Pn -sC -sV 192.168.12.145 | tee -a DC-Nmap.txt
 ```
+```bash
+cat DC-Nmap.txt | grep Discovered | cut -d ' ' -f 4 | cut -d '/' -f 1 | sort -u | tr '\n' ',' | sed 's/,$//'  > open_ports
+```
+```bash
+nmap -p $(cat open_ports) -sV 10.129.234.71 
+```
 _we can use nxc smb to get the domain name and NETBIOS name_
 ```shell
 nxc smb 192.168.12.145 #Single target
