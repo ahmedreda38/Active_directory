@@ -49,3 +49,26 @@ then we can use this to injest in bloodhound and find the mapping and relations 
 bloodhound-python -d <domain-name> -u <username> -p <password> -ns <dc-ip> -c All --zip
 ```
 
+## Using bloodhound
+using the `bloodhound-cli` binary, we need to follow these steps
+1. if now installed we build up the container
+```shell
+./bloodhound-cli install #[uninstall]
+```
+2. spawn it
+```shell
+./bloodhound-cli up
+# to stop we use [down]
+```
+3. get the default password if missed
+```shell
+./bloodhound-cli config get default_password
+```
+4. reset default password
+```shell
+./bloodhound-cli resetpwd                   
+```
+5. for more debugging during the runtime 
+```shell
+docker logs bloodhound-bloodhound-1 # <-- container name
+```
