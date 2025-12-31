@@ -26,7 +26,6 @@ nxc smb 10.10.10.128 -u anonymous -p '' --shares
 nxc ldap 10.10.10.128 -u '' -p '' --users
 nxc ldap 10.10.10.128 -u anonymous -p '' --users
 nxc smb 10.10.10.128 -u 'anonymous' -p '' --rid-brute | grep "SidTypeUser"
-
 ```
 ### All in on version to get and store the users in users.txt
 ```shell
@@ -44,3 +43,9 @@ nxc smb 10.10.10.128 -u 'anonymous' -p '' --rid-brute | grep "SidTypeUser" | cut
   # NOTE: if the domain_users.html file is 905 size this means it failed.
   ldapdomaindump 'ldap://target.ip:389' -u '<domain-name>\<username>' -p  'hisSup3rscurPA$$'
   ```
+- using Bloodhound
+then we can use this to injest in bloodhound and find the mapping and relations and etc..
+```shell
+bloodhound-python -d <domain-name> -u <username> -p <password> -ns <dc-ip> -c All --zip
+```
+
