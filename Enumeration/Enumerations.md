@@ -54,7 +54,6 @@ then we can use this to injest in bloodhound and find the mapping and relations 
 ```shell
 bloodhound-python -d <domain-name> -u <username> -p <password> -ns <dc-ip> -c All --zip
 ```
-
 ## Using bloodhound
 using the `bloodhound-cli` binary, we need to follow these steps
 1. if now installed we build up the container
