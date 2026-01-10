@@ -17,8 +17,8 @@ Tool: DiskShadow.exe, custom C# tools
 
 
 
-SeImpersonatePrivilege
-Allows: Impersonating access tokens of other users (like SYSTEM).
+## SeImpersonatePrivilege
+> Allows: Impersonating access tokens of other users (like SYSTEM).
 Exploit:
 Token impersonation or privilege escalation via named pipes.
 Abuse services like PrintSpoofer or JuicyPotato.
@@ -42,8 +42,8 @@ Tool: Often used as part of token-impersonation chains.
 
 
 
-SeDebugPrivilege
-Allows: Attaching to any process, including SYSTEM-level processes.
+## SeDebugPrivilege
+> Allows: Attaching to any process, including SYSTEM-level processes.
 Exploit:
 Dump LSASS (for creds).
 Inject code into SYSTEM processes.
