@@ -1,3 +1,17 @@
+## Using PowerUP.ps1 for local privesc
+```powershell
+powershell -ep bypass
+. .\PowerUP.ps1
+Invoke-AllChecks -Verbose
+```
+- Listing Modifiable Services
+```powershell
+Get-ModifiableService -Verbose
+```
+
+
+
+
 Common Privileged Rights Abused for LPE
 SeBackupPrivilege
 Allows: Reading any file regardless of ACLs.

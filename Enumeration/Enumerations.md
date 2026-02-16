@@ -77,3 +77,11 @@ using the `bloodhound-cli` binary, we need to follow these steps
 ```shell
 docker logs bloodhound-bloodhound-1 # <-- container name
 ```
+
+
+## No Credentials Given
+### Enumerating Valid usernames
+- Using `kerbrute` (Enumerating Valid usernames via Kerberos)
+```bash
+kerbrute userenum --dc dc.hercules.htb -d hercules.htb /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt --output users.txt -t 25
+```
