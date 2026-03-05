@@ -24,7 +24,7 @@ arp -a
 ```powershell
 route print
 ```
--Identify Gateways
+- Identify Gateways
 ```powershell
 ipconfig /all
 ```
