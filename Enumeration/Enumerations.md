@@ -41,6 +41,12 @@ nxc smb 10.10.10.128 -u 'anonymous' -p '' --rid-brute | grep "SidTypeUser" | cut
   ```shell
   ldapsearch -H ldap://10.10.10.128 -x -b "DC=simply,DC=cyber" '(objectclass=person)' | grep sAMAccountName | cut -d ':' -f 2 | tr -d ' '
   ```
+- Using RCP Null session
+  ```bash
+  rpcclient -U "" -N dc01.shadow.gate -c "lsaquery"
+  rpcclient -U "" -N dc01.shadow.gate -c "querydominfo"
+  rpcclient -U "" -N dc01.shadow.gate -c "enumdomusers"
+  ```
 ### Enumerating Users with found credentials
 - using ldapdomaindump
 - ```shell
