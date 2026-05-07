@@ -17,6 +17,8 @@ cat DC-Nmap.txt | grep Discovered | cut -d ' ' -f 4 | cut -d '/' -f 1 | sort -u 
 ```bash
 nmap -p $(cat open_ports) -sV 10.129.234.71 
 ```
+
+## No Credentials Given
 _we can use nxc smb to get the domain name and NETBIOS name_
 ```shell
 nxc smb 192.168.12.145 #Single target
@@ -34,9 +36,10 @@ nxc ldap 10.10.10.128 -u anonymous -p '' --users
 nxc smb 10.10.10.128 -u 'anonymous' -p '' --rid-brute | grep "SidTypeUser"
 ```
 ### All in on version to get and store the users in users.txt
-```shell
-nxc smb 10.10.10.128 -u 'anonymous' -p '' --rid-brute | grep "SidTypeUser" | cut -d '\' -f 2 | cut -d ' ' -f 1 > users.txt
-```
+- Netexec - SMB
+  ```shell
+  nxc smb 10.10.10.128 -u 'anonymous' -p '' --rid-brute | grep "SidTypeUser" | cut -d '\' -f 2 | cut -d ' ' -f 1 > users.txt
+  ```
 - using _ldapsearch_
   ```shell
   ldapsearch -H ldap://10.10.10.128 -x -b "DC=simply,DC=cyber" '(objectclass=person)' | grep sAMAccountName | cut -d ':' -f 2 | tr -d ' '
@@ -49,18 +52,31 @@ nxc smb 10.10.10.128 -u 'anonymous' -p '' --rid-brute | grep "SidTypeUser" | cut
   ```
 ### Enumerating Users with found credentials
 - using ldapdomaindump
-- ```shell
+  ```shell
   mkdir ldapdump && cd ldapdump
   # will dump many information about the domain in amny forms
   # NOTE: if the domain_users.html file is 905 size this means it failed.
   ldapdomaindump 'ldap://target.ip:389' -u '<domain-name>\<username>' -p  'hisSup3rscurPA$$'
   ```
-- using Bloodhound
+### Enumerating Valid usernames via kerbrute
+- Using `kerbrute` (Enumerating Valid usernames via Kerberos)
+  ```bash
+  kerbrute userenum --dc dc.hercules.htb -d hercules.htb /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt --output users.txt -t 25
+  ```
+--- 
+  
+-  collecting Bloodhound data
 then we can use this to injest in bloodhound and find the mapping and relations and etc..
-```shell
-bloodhound-python -d <domain-name> -u <username> -p <password> -ns <dc-ip> -c All --zip
-```
-## Using bloodhound
+- `bloodhound-python`
+  ```shell
+  bloodhound-python -d <domain-name> -u <username> -p <password> -ns <dc-ip> -c All --zip
+  ```
+- `rusthound-ce`
+  ```bash
+  rusthound-ce -d amzcorp.local  -u "jameshauwnnel@amzcorp.local" -p '654221p!' --zip
+  ```
+
+## Using Bloodhound Community edition
 using the `bloodhound-cli` binary, we need to follow these steps
 1. if now installed we build up the container
 ```shell
@@ -85,9 +101,4 @@ docker logs bloodhound-bloodhound-1 # <-- container name
 ```
 
 
-## No Credentials Given
-### Enumerating Valid usernames
-- Using `kerbrute` (Enumerating Valid usernames via Kerberos)
-```bash
-kerbrute userenum --dc dc.hercules.htb -d hercules.htb /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt --output users.txt -t 25
-```
+
