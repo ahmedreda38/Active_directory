@@ -265,7 +265,7 @@ impacket-secretsdump 'ignite.local'/'shreya':'Password@1'@'192.168.1.48'
 - `WriteDACL` abused with `Add-DomainObjectACL`
 - `AllExtendedRights` abused with `Set-DomainUserPassword` or `Add-DomainGroupMember`
 - `AddSelf` abused with `Add-DomainGroupMember`
-![[Pasted image 20260316114215.png]]
+![PowerView ACL abuses](../images/powerview-acl-abuses.png)
 
 ## Enumerating ACLs using Powerview
 - Wildcard enumerations

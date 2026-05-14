@@ -5,7 +5,7 @@
 
 ## DCSync
 >DCSync is a technique for stealing the Active Directory password database by using the built-in `Directory Replication Service Remote Protocol`, which is used by Domain Controllers to replicate domain data. This allows an attacker to mimic a Domain Controller to retrieve user NTLM password hashes.
-![[Pasted image 20260316143719.png]]
+![DCSync diagram](../images/dcsync-replication-flow.png)
 ### Windows
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /domain:domain.local /user:domain\Administrator"'

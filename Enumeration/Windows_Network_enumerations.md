@@ -215,7 +215,7 @@ dsquery * -filter "(&(objectCategory=person)(objectClass=user)(userAccountContro
 ```powershell
 dsquery * -filter "(userAccountControl:1.2.840.113556.1.4.803:=8192)" -limit 5 -attr sAMAccountName
 ```
-- ![[Pasted image 20260313150732.png]]
+- ![Domain controller search](../images/domain-controller-dsquery-search.png)
 #### LDAP querying **UserAccountControl** UAC
 ##### OID matching rules
 1. `1.2.840.113556.1.4.803`:

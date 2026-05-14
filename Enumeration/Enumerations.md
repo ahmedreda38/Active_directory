@@ -499,7 +499,7 @@ bloodhound-python -u dead.user -p changeMeFr -ns <domain-ip> -d doman.name -c al
 - `WriteDACL` abused with `Add-DomainObjectACL`
 - `AllExtendedRights` abused with `Set-DomainUserPassword` or `Add-DomainGroupMember`
 - `AddSelf` abused with `Add-DomainGroupMember`
-![[Pasted image 20260316114215.png]]
+![PowerView ACL abuses](../images/powerview-acl-abuses.png)
 
 ### Enumerating ACLs using Powerview
 - Wildcard enumerations
@@ -714,7 +714,7 @@ dsquery * -filter "(&(objectCategory=person)(objectClass=user)(userAccountContro
 ```powershell
 dsquery * -filter "(userAccountControl:1.2.840.113556.1.4.803:=8192)" -limit 5 -attr sAMAccountName
 ```
-- ![[Pasted image 20260313150732.png]]
+- ![Domain controller search](../images/domain-controller-dsquery-search.png)
 
 #### LDAP querying **UserAccountControl** UAC
 
