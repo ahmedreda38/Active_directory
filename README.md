@@ -19,7 +19,7 @@ If you are new to the repo, follow this path:
 
 | Note | Purpose |
 | --- | --- |
-| [AD Infrastructure](./AD-Structure/AD_Infrastructure.md) | Core AD components, OUs, trusts, and replication. |
+| [AD structure](./AD-Structure/AD_structure.md) | Core AD components, OUs, trusts, and replication. |
 | [Active Directory Objects](./AD-Structure/Active_Directory_Objects.md) | Object types, security principals, and pentest relevance. |
 | [Important Terminologies](./AD-Structure/Important_Terminologies.md) | AD vocabulary such as SID, DN, GUID, ACL, DACL, SYSVOL, and NTDS.dit. |
 | [Important Protocols](./AD-Structure/Important-Protocols.md) | Kerberos, DNS, LDAP, MSRPC, SAMR, and DRSUAPI basics. |
