@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="images/banner.png" alt="Playbook banner" width="100%">
+</p>
+
 # Active Directory Pentesting Notes
 
 Personal Active Directory pentesting notes, cheatsheets, and command references for authorized labs and assessments.
