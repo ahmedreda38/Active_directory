@@ -2,24 +2,18 @@
 
 Personal Active Directory pentesting notes, cheatsheets, and command references for authorized labs and assessments.
 
-> Use these notes only in environments where you have explicit permission to test.
+> Simple Notes I take while studying..
 
 ## Quick Start
 
 If you are new to the repo, follow this path:
 
-1. Review the assessment boundaries in [Start Here](#start-here).
-2. Build the base concepts from [AD Structure](#ad-structure).
-3. Work through discovery in [Enumeration](#enumeration).
-4. Validate weaknesses from [Attacks](#attacks).
-5. Continue with [Movement and Compromise](#movement-and-compromise).
-6. Use [Tools](#tools) and [Defense](#defense) as supporting references.
+1. Build the base concepts from [AD Structure](#ad-structure).
+2. Work through discovery in [Enumeration](#enumeration).
+3. Validate weaknesses from [Attacks](#attacks).
+4. Continue with [Movement and Compromise](#movement-and-compromise).
+5. Use [Tools](#tools) and [Defense](#defense) as supporting references.
 
-## Start Here
-
-| Note | Purpose |
-| --- | --- |
-| [Assessment Scope](./Start-Here/Assessment_Scope.md) | Assessment scope notes from the source vault. |
 
 ## AD Structure
 
@@ -82,46 +76,5 @@ If you are new to the repo, follow this path:
 | --- | --- |
 | [AD Hardening](./Defense/AD_Hardening.md) | Hardening Active Directory notes from the source vault. |
 
-## Images
 
-| Image | Used By |
-| --- | --- |
-| [Kerberos flow](./images/kerberos.png) | [Important Protocols](./AD-Structure/Important-Protocols.md) |
-| [NTLM authentication flow](./images/NTLM_auth.png) | [NTLM Relay](./attacks/NTLM_Relay.md) |
 
-## Suggested Note Format
-
-For new cheatsheets, try to keep each note consistent:
-
-```text
-# Technique or Topic
-
-## What It Is
-Short explanation of the concept.
-
-## Requirements
-Access, configuration, tools, or preconditions.
-
-## Enumeration
-How to identify whether the technique applies.
-
-## Exploitation or Usage
-Commands and workflow using placeholders, not real credentials.
-
-## Cleanup
-How to undo changes when applicable.
-
-## Detection and Mitigation
-Logs, alerts, hardening, and defensive controls.
-
-## References
-Source links and further reading.
-```
-
-## Publishing Checklist
-
-- Replace real usernames, passwords, hashes, domains, and IPs with placeholders.
-- Prefer placeholders such as `<domain>`, `<dc-ip>`, `<user>`, `<password>`, and `<target>`.
-- Keep one main topic per file.
-- Store diagrams in `images/` and use relative links.
-- Add new notes to this README so the repo stays easy to browse.
