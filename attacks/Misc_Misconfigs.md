@@ -1,7 +1,5 @@
 # Misc Misconfigs
-```
-SSH to `172.16.5.225` with the credentials `htb-student:HTB_@cademy_stdnt!`
-```
+
 ## Exchange Group membership
 - `Exchange Windows Permissions` GROUP: The default installation for Microsoft exchange server give its members the ability to Write DACL, which means any member can just Give DCSync Privs to a low privileged user and compromise the whole domain -> refer to this [gdedrouas/Exchange-AD-Privesc: Exchange privilege escalations to Active Directory](https://github.com/gdedrouas/Exchange-AD-Privesc)
 - `Organization Management` group: this is like the Domain Admins of Exchange, any member can read all mailboxes in the domain
