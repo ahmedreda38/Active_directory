@@ -14,7 +14,7 @@ By default when a domain user tries to authenticate to the kerberos AS (Authenti
 ## the checkbox that allows for this attack ☑️
 <img width="405" height="537" alt="image" src="https://github.com/user-attachments/assets/afdf036a-b067-4c3a-bd30-7aaa79ca9999" />
 
-## how to attack works?
+## how does the attack work?
 1. When a user has `Do not require Kerberos pre-authentication` enabled, this means the pre-authentication step is SKIPPED!, hence we can get to the second step (Getting the AS_REP that contains the Session key)
 2. Once we have the session key (encrypted with user's password hash), we can try to Crack it offline with hashcat or john
 
