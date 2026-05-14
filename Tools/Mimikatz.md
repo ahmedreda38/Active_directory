@@ -1,4 +1,5 @@
-- Tool built totally in `C`.
+# Mimikatz - you just can't hide your creds from this tool..
+- the Tool is built totally in `C` (it all started when the author @gentilkiwi wanted to practice coding in `C` xD).
 - precompiled binaries, [https://github.com/gentilkiwi/mimikatz/releases](https://github.com/gentilkiwi/mimikatz/releases)
 ### What has `mimikatz` done to microsoft?
 - prob lots of damage, but this was because microsoft responds that this tool need an administrator, and it is the software design that can't be fixed, and after lots of big attacks and large money losses, microsoft decided to put some security controls to try protecting against some of what mimikatz does, such as:
