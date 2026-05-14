@@ -70,15 +70,15 @@ If you are new to the repo, follow this path:
 
 | Note | Purpose |
 | --- | --- |
-| [Mimikatz](./Tools/Mimikatz.md) | Mimikatz notes copied from the source vault. |
-| [Metasploit](./Tools/Metasploit.md) | Metasploit notes copied from the source vault. |
-| [SliverC2](./Tools/SliverC2.md) | SliverC2 notes copied from the source vault. |
+| [Mimikatz](./Tools/Mimikatz.md) | Mimikatz technical overview + windows internals notes  |
+| [Metasploit](./Tools/Metasploit.md) | Metasploit notes and structure|
+| [SliverC2](./Tools/SliverC2.md) | SliverC2 notes (yet to be improved) |
 
 ## Defense
 
 | Note | Purpose |
 | --- | --- |
-| [AD Hardening](./Defense/AD_Hardening.md) | Hardening Active Directory notes from the source vault. |
+| [AD Hardening](./Defense/AD_Hardening.md) | Hardening Active Directory notes (don't expect that much for this one xD) |
 
 
 
